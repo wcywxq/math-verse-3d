@@ -1,0 +1,5 @@
+{
+  "name": "MathVerse 3D: 公考数量关系可视化",
+  "description": "一个基于 3D 可视化的公务员考试数量关系学习平台。通过 Gemini 生成题目并驱动 3D 场景，动态演示行程问题、工程问题与几何变化，帮助学生直观理解解题逻辑。",
+  "requestFramePermissions": []
+}
