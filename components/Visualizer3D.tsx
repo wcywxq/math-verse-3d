@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ProblemData, SceneType } from '../types';
 import { Scene2D } from './scenes/Scene2D';
-import { Play, Pause, RotateCcw, Maximize } from 'lucide-react';
+import { Play, Pause, RotateCcw, Maximize, Minimize } from 'lucide-react';
 
 interface Props {
   problem: ProblemData;
@@ -11,6 +11,7 @@ export const Visualizer3D: React.FC<Props> = ({ problem }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [speedMultiplier, setSpeedMultiplier] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Reset when problem changes
   useEffect(() => {
@@ -60,16 +61,27 @@ export const Visualizer3D: React.FC<Props> = ({ problem }) => {
   // Only show controls if we have valid movement parameters
   const hasControls = problem.type === SceneType.MOVEMENT && !!problem.movementParams;
 
+  const containerClass = isFullscreen 
+    ? "fixed inset-0 z-50 bg-slate-100 w-screen h-screen flex flex-col"
+    : "relative w-full h-full bg-slate-50 overflow-hidden flex flex-col border-l border-gray-200";
+
   return (
-    <div className="relative w-full h-full bg-slate-50 overflow-hidden flex flex-col border-l border-gray-200">
+    <div className={containerClass}>
       
-      {/* Header Label */}
-      <div className="absolute top-4 left-4 z-20 bg-white/80 backdrop-blur border border-gray-200 px-3 py-1.5 rounded-md shadow-sm">
-         <h3 className="text-xs font-bold text-indigo-900 uppercase tracking-wider flex items-center gap-2">
-            <Maximize size={14} />
-            2D 全景演示视图
-         </h3>
-      </div>
+      {/* Header / Fullscreen Toggle */}
+      <button 
+        onClick={() => setIsFullscreen(!isFullscreen)}
+        className="absolute top-4 left-4 z-20 bg-white/90 backdrop-blur border border-gray-200 px-3 py-1.5 rounded-md shadow-sm hover:bg-white hover:shadow-md transition-all flex items-center gap-2 cursor-pointer group"
+      >
+         {isFullscreen ? (
+            <Minimize size={16} className="text-indigo-600" />
+         ) : (
+            <Maximize size={16} className="text-indigo-600" />
+         )}
+         <span className="text-xs font-bold text-indigo-900 uppercase tracking-wider group-hover:text-indigo-700">
+            {isFullscreen ? '退出全屏' : '全屏演示'}
+         </span>
+      </button>
 
       {/* Main Visualization Area */}
       <div className="flex-1 w-full h-full flex items-center justify-center p-4 relative">
@@ -78,7 +90,7 @@ export const Visualizer3D: React.FC<Props> = ({ problem }) => {
 
       {/* Playback Controls */}
       {hasControls && (
-        <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 px-8 shadow-[0_-4px_20px_rgba(0,0,0,0.02)] z-30">
+        <div className={`bg-white border-t border-gray-200 p-4 px-8 shadow-[0_-4px_20px_rgba(0,0,0,0.02)] z-30 ${isFullscreen ? 'pb-8' : ''}`}>
             <div className="max-w-3xl mx-auto flex flex-col gap-3">
                 {/* Progress Bar & Time */}
                 <div className="flex items-center gap-4">

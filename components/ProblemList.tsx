@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ProblemData, SceneType } from '../types';
-import { Scroll, Search, Inbox, FileText } from 'lucide-react';
+import { Scroll, Search, Inbox, FileText, ChevronLeft, ChevronRight, Award, PenTool } from 'lucide-react';
+import { HighlightText } from './common/HighlightText';
 
 interface Props {
   problems: ProblemData[];
@@ -8,45 +9,38 @@ interface Props {
   onSelect: (problem: ProblemData) => void;
 }
 
-// Utility to escape regex special characters
-function escapeRegExp(string: string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-// Helper component to highlight matched text
-const HighlightText: React.FC<{ text: string; highlight: string }> = ({ text, highlight }) => {
-  if (!highlight.trim()) {
-    return <>{text}</>;
-  }
-
-  // Create a regex that matches the highlight string case-insensitively
-  const regex = new RegExp(`(${escapeRegExp(highlight)})`, 'gi');
-  const parts = text.split(regex);
-
-  return (
-    <>
-      {parts.map((part, index) =>
-        // Check if this part matches the highlight (case-insensitive check)
-        part.toLowerCase() === highlight.toLowerCase() ? (
-          <span key={index} className="text-red-700 bg-yellow-300 rounded-sm px-0.5 font-extrabold shadow-sm">
-            {part}
-          </span>
-        ) : (
-          <span key={index}>{part}</span>
-        )
-      )}
-    </>
-  );
-};
-
 export const ProblemList: React.FC<Props> = ({ problems, currentId, onSelect }) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState<'all' | 'real' | 'mock'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Reset to page 1 when search or tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, activeTab]);
 
   const filteredProblems = useMemo(() => {
-    if (!searchTerm.trim()) return problems;
+    let result = problems;
+
+    // 1. Filter by Category (Tab)
+    if (activeTab === 'real') {
+        result = result.filter(p => {
+            const source = p.source || '';
+            return !source.includes('模考') && !source.includes('模拟');
+        });
+    } else if (activeTab === 'mock') {
+        result = result.filter(p => {
+            const source = p.source || '';
+            return source.includes('模考') || source.includes('模拟');
+        });
+    }
+
+    // 2. Filter by Search Term
+    if (!searchTerm.trim()) return result;
     
     const lowerTerm = searchTerm.toLowerCase();
-    return problems.filter(problem => {
+    return result.filter(problem => {
         const matchTitle = problem.title.toLowerCase().includes(lowerTerm);
         const matchSource = problem.source?.toLowerCase().includes(lowerTerm) || false;
         const matchQuestion = problem.question.toLowerCase().includes(lowerTerm);
@@ -54,30 +48,75 @@ export const ProblemList: React.FC<Props> = ({ problems, currentId, onSelect }) 
         
         return matchTitle || matchSource || matchQuestion || matchType;
     });
-  }, [problems, searchTerm]);
+  }, [problems, searchTerm, activeTab]);
+
+  const totalPages = Math.ceil(filteredProblems.length / itemsPerPage);
+  
+  const paginatedProblems = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredProblems.slice(start, start + itemsPerPage);
+  }, [filteredProblems, currentPage]);
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) setCurrentPage(prev => prev - 1);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
+  };
 
   return (
     <div className="flex flex-col h-full bg-white border-r border-gray-200 w-80 flex-shrink-0">
-      <div className="p-4 border-b border-gray-100 bg-gray-50">
-        <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2 mb-3">
+      <div className="p-4 border-b border-gray-100 bg-gray-50 space-y-3">
+        <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
           <Scroll size={16} />
-          真题题库 (2020-2025)
+          题库列表 (2020-2025)
         </h2>
+        
+        {/* Search Bar */}
         <div className="relative">
             <Search size={14} className="absolute left-3 top-2.5 text-gray-400" />
             <input 
                 type="text" 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="搜索题目、年份或类型..." 
+                placeholder="搜索..." 
                 className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder-gray-400"
             />
+        </div>
+
+        {/* Category Tabs */}
+        <div className="flex p-1 bg-gray-200/60 rounded-lg">
+            <button 
+                onClick={() => setActiveTab('all')}
+                className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${
+                    activeTab === 'all' ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                }`}
+            >
+                全部
+            </button>
+            <button 
+                onClick={() => setActiveTab('real')}
+                className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1 ${
+                    activeTab === 'real' ? 'bg-white text-amber-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                }`}
+            >
+                <Award size={12} /> 真题
+            </button>
+            <button 
+                onClick={() => setActiveTab('mock')}
+                className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1 ${
+                    activeTab === 'mock' ? 'bg-white text-purple-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                }`}
+            >
+                <PenTool size={12} /> 模考
+            </button>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {filteredProblems.length > 0 ? (
-            filteredProblems.map((problem) => (
+        {paginatedProblems.length > 0 ? (
+            paginatedProblems.map((problem) => (
             <button
                 key={problem.id}
                 onClick={() => onSelect(problem)}
@@ -93,10 +132,12 @@ export const ProblemList: React.FC<Props> = ({ problems, currentId, onSelect }) 
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-tight ${
                         problem.type === SceneType.MOVEMENT 
                         ? 'bg-blue-50 text-blue-600 border-blue-100' 
-                        : 'bg-purple-50 text-purple-600 border-purple-100'
+                        : (problem.type === SceneType.GEOMETRY 
+                            ? 'bg-purple-50 text-purple-600 border-purple-100'
+                            : 'bg-green-50 text-green-600 border-green-100')
                     }`}>
                         <HighlightText 
-                          text={problem.type === SceneType.MOVEMENT ? '行程' : '几何'} 
+                          text={problem.type === SceneType.MOVEMENT ? '行程' : (problem.type === SceneType.GEOMETRY ? '几何' : '其他')} 
                           highlight={searchTerm} 
                         />
                     </span>
@@ -127,17 +168,34 @@ export const ProblemList: React.FC<Props> = ({ problems, currentId, onSelect }) 
             <div className="flex flex-col items-center justify-center h-48 text-gray-400 px-6 text-center">
                 <Inbox size={32} className="mb-2 opacity-50" />
                 <p className="text-sm">未找到相关题目</p>
-                <p className="text-xs mt-1">尝试搜索 "行程", "2024", 或具体题干关键词</p>
-            </div>
-        )}
-        
-        {filteredProblems.length > 0 && (
-            <div className="p-4 text-center border-t border-gray-50 mt-auto">
-                <p className="text-[10px] text-gray-400 font-medium">
-                   显示 {filteredProblems.length} 道 / 共 {problems.length} 道
+                <p className="text-xs mt-1">
+                    {activeTab === 'mock' ? '当前分类下没有模考题目' : '尝试更换关键词或重置筛选'}
                 </p>
             </div>
         )}
+      </div>
+      
+      {/* Pagination Controls */}
+      <div className="p-3 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+            <button 
+                onClick={handlePrevPage} 
+                disabled={currentPage === 1}
+                className="p-1.5 rounded-md hover:bg-gray-200 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+            >
+                <ChevronLeft size={16} className="text-gray-600" />
+            </button>
+            
+            <span className="text-xs font-medium text-gray-500">
+                {filteredProblems.length > 0 ? `${currentPage} / ${totalPages}` : '0 / 0'}
+            </span>
+
+            <button 
+                onClick={handleNextPage} 
+                disabled={currentPage === totalPages || totalPages === 0}
+                className="p-1.5 rounded-md hover:bg-gray-200 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+            >
+                <ChevronRight size={16} className="text-gray-600" />
+            </button>
       </div>
     </div>
   );

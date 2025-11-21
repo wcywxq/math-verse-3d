@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ProblemData } from '../types';
 import { ChevronDown, ChevronUp, Calculator, BookOpen, Lightbulb, Tag } from 'lucide-react';
-import { LatexText } from './LatexText';
+import { LatexText } from './common/LatexText';
 
 interface Props {
   problem: ProblemData;
