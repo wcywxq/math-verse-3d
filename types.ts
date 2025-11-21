@@ -4,6 +4,8 @@ export enum SceneType {
   WORK = 'WORK' // 工程问题 (represented as progress bars)
 }
 
+export type AppModule = 'PRACTICE' | 'KNOWLEDGE';
+
 export interface MovementParams {
   objectAName: string;
   objectBName: string;
@@ -40,4 +42,17 @@ export interface ProblemData {
 export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
+}
+
+// Knowledge Base Types
+export interface ArticleSection {
+  id: string;
+  title: string;
+  content: string; // Markdown-like or plain text with LaTeX
+}
+
+export interface KnowledgeChapter {
+  id: string;
+  title: string;
+  sections: ArticleSection[];
 }
