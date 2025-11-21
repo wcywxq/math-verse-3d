@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ProblemPanel } from './components/ProblemPanel';
-import { Visualizer3D } from './components/Visualizer3D';
+import { Visualizer3D } from './components/Visualizer3D'; // Now essentially 2D Panel
 import { ProblemList } from './components/ProblemList';
 import { generateMathProblem } from './services/geminiService';
 import { PRESET_PROBLEMS } from './data/presets';
@@ -38,6 +38,7 @@ const App: React.FC = () => {
   };
 
   // Check if the current problem has the necessary parameters for visualization
+  // Note: We strictly focus on MOVEMENT now as Geometry 2D is less prioritized but still works if data exists.
   const hasVisuals = (
     (currentProblem.type === SceneType.MOVEMENT && !!currentProblem.movementParams) || 
     (currentProblem.type === SceneType.GEOMETRY && !!currentProblem.geometryParams)
@@ -63,7 +64,7 @@ const App: React.FC = () => {
             <Box size={18} strokeWidth={2.5} />
           </div>
           <div>
-            <h1 className="text-base font-bold tracking-tight text-gray-900">MathVerse 3D</h1>
+            <h1 className="text-base font-bold tracking-tight text-gray-900">MathVerse 2D</h1>
           </div>
         </div>
 
@@ -73,14 +74,7 @@ const App: React.FC = () => {
                 disabled={isLoading}
                 className="hidden md:flex items-center px-3 py-1.5 text-xs font-medium bg-indigo-50 text-indigo-700 rounded-md hover:bg-indigo-100 transition-colors"
              >
-                ✨ AI 随机生成行程题
-             </button>
-             <button 
-                onClick={() => handleGenerate("公考数量关系，几何问题")}
-                disabled={isLoading}
-                className="hidden md:flex items-center px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded-md hover:bg-purple-100 transition-colors"
-             >
-                ✨ AI 随机生成几何题
+                ✨ AI 生成新题目
              </button>
         </div>
       </header>
@@ -94,45 +88,40 @@ const App: React.FC = () => {
             ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
         `}>
            <ProblemList 
-              problems={PRESET_PROBLEMS} 
+              problems={PRESET_PROBLEMS}
               currentId={currentProblem.id}
               onSelect={handleSelectPreset}
            />
         </div>
 
-        {/* Overlay for mobile menu */}
-        {isMobileMenuOpen && (
-            <div 
-                className="fixed inset-0 z-10 bg-black/50 md:hidden"
-                onClick={() => setIsMobileMenuOpen(false)}
-            />
-        )}
-
-        {/* Problem Detail Panel */}
-        <div className={`
-            h-full overflow-hidden relative z-10 bg-white transition-all duration-300 ease-in-out
-            ${showRightPanel ? 'w-full md:w-4/12 lg:w-3/12 border-r border-gray-200' : 'flex-1 w-full'}
-        `}>
-           <div className={`h-full w-full ${!showRightPanel ? 'max-w-5xl mx-auto shadow-[inset_0_0_20px_rgba(0,0,0,0.02)]' : ''}`}>
-              <ProblemPanel problem={currentProblem} />
-           </div>
-        </div>
-
-        {/* 3D Scene - Only Render if Visualizable or Loading */}
-        {showRightPanel && (
-            <div className="w-full md:w-8/12 lg:w-6/12 flex-1 h-full bg-slate-900 relative transition-all duration-300 ease-in-out">
-                <Visualizer3D problem={currentProblem} />
-                
-                {/* Loading Overlay */}
-                {isLoading && (
-                    <div className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center text-white animate-fade-in">
-                        <Loader2 size={48} className="animate-spin text-indigo-400 mb-4" />
-                        <h3 className="text-xl font-bold">正在分析 {loadingTopic}...</h3>
-                        <p className="text-gray-300 mt-2 text-sm">AI 正在生成题目并构建 3D 演示</p>
-                    </div>
-                )}
+        {/* Right Panel: Problem Details & Visuals */}
+        <div className="flex-1 flex flex-col md:flex-row relative transition-all duration-300 ease-in-out">
+            
+            {/* Detail Panel */}
+            <div className={`
+                flex-1 h-full overflow-hidden transition-all duration-500
+                ${showRightPanel ? 'w-full md:w-1/3 lg:w-5/12 border-r border-gray-200' : 'w-full'}
+            `}>
+                <div className="h-full overflow-y-auto">
+                    <ProblemPanel problem={currentProblem} />
+                </div>
             </div>
-        )}
+
+            {/* Visual Panel (Conditional) */}
+            {showRightPanel && (
+                <div className="flex-1 h-full bg-slate-50 relative animate-fade-in">
+                     {isLoading && (
+                        <div className="absolute inset-0 z-50 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center text-indigo-600">
+                            <Loader2 size={40} className="animate-spin mb-4" />
+                            <p className="font-medium">正在生成题目...</p>
+                            <p className="text-sm text-gray-500 mt-2">主题: {loadingTopic}</p>
+                        </div>
+                     )}
+                     <Visualizer3D problem={currentProblem} />
+                </div>
+            )}
+
+        </div>
       </main>
     </div>
   );

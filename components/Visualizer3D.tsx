@@ -1,10 +1,7 @@
-import React, { useState, useEffect, Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { SceneType, ProblemData } from '../types';
-import { MovementScene } from './scenes/MovementScene';
-import { GeometryScene } from './scenes/GeometryScene';
+import React, { useState, useEffect } from 'react';
+import { ProblemData, SceneType } from '../types';
 import { Scene2D } from './scenes/Scene2D';
-import { Play, Pause, RotateCcw, Maximize, Box, LayoutTemplate } from 'lucide-react';
+import { Play, Pause, RotateCcw, Maximize } from 'lucide-react';
 
 interface Props {
   problem: ProblemData;
@@ -14,7 +11,6 @@ export const Visualizer3D: React.FC<Props> = ({ problem }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [speedMultiplier, setSpeedMultiplier] = useState(1);
-  const [viewMode, setViewMode] = useState<'3D' | '2D'>('3D');
 
   // Reset when problem changes
   useEffect(() => {
@@ -37,8 +33,7 @@ export const Visualizer3D: React.FC<Props> = ({ problem }) => {
       const delta = (time - lastTime) / 1000; // seconds
       lastTime = time;
 
-      // If movement problem, progress is time / totalTime
-      // Let's say the total animation cycle takes 10 real seconds by default for full progress
+      // Base duration: 10 seconds for the full simulation
       const animationDuration = 10 / speedMultiplier; 
       
       setProgress((prev) => {
@@ -62,99 +57,72 @@ export const Visualizer3D: React.FC<Props> = ({ problem }) => {
     setIsPlaying(false);
   };
 
-  const render3DScene = () => {
-    if (problem.type === SceneType.MOVEMENT && problem.movementParams) {
-      return (
-        <MovementScene 
-            params={problem.movementParams} 
-            progress={progress} 
-            isPlaying={isPlaying} 
-        />
-      );
-    }
-    if (problem.type === SceneType.GEOMETRY && problem.geometryParams) {
-      return <GeometryScene params={problem.geometryParams} />;
-    }
-    return null;
-  };
-
-  // Helper to check if we have valid movement params to show controls
-  const hasMovementParams = problem.type === SceneType.MOVEMENT && !!problem.movementParams;
-  // Helper to check if we have valid geometry params for legend
-  const hasGeometryParams = problem.type === SceneType.GEOMETRY && !!problem.geometryParams;
+  // Only show controls if we have valid movement parameters
+  const hasControls = problem.type === SceneType.MOVEMENT && !!problem.movementParams;
 
   return (
-    <div className="relative w-full h-full bg-slate-900 overflow-hidden flex flex-col">
-      {/* View Mode Toggle */}
-      <div className="absolute top-4 right-4 z-20 flex bg-white/10 backdrop-blur-md rounded-lg p-1 border border-white/20">
-         <button 
-            onClick={() => setViewMode('3D')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold transition-colors ${viewMode === '3D' ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-300 hover:bg-white/10'}`}
-         >
-            <Box size={14} /> 3D 视图
-         </button>
-         <button 
-            onClick={() => setViewMode('2D')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold transition-colors ${viewMode === '2D' ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-300 hover:bg-white/10'}`}
-         >
-            <LayoutTemplate size={14} /> 2D 平面
-         </button>
+    <div className="relative w-full h-full bg-slate-50 overflow-hidden flex flex-col border-l border-gray-200">
+      
+      {/* Header Label */}
+      <div className="absolute top-4 left-4 z-20 bg-white/80 backdrop-blur border border-gray-200 px-3 py-1.5 rounded-md shadow-sm">
+         <h3 className="text-xs font-bold text-indigo-900 uppercase tracking-wider flex items-center gap-2">
+            <Maximize size={14} />
+            2D 全景演示视图
+         </h3>
       </div>
 
-      {/* Canvas Area */}
-      <div className="flex-1 relative h-full w-full">
-        {viewMode === '3D' ? (
-            <Suspense fallback={<div className="flex items-center justify-center h-full text-white">Loading 3D Model...</div>}>
-                <Canvas shadows camera={{ position: [0, 5, 12], fov: 50 }}>
-                    {render3DScene()}
-                </Canvas>
-            </Suspense>
-        ) : (
-            <div className="w-full h-full bg-slate-100 p-4 flex items-center justify-center">
-                 <Scene2D problem={problem} progress={progress} />
-            </div>
-        )}
+      {/* Main Visualization Area */}
+      <div className="flex-1 w-full h-full flex items-center justify-center p-4 relative">
+          <Scene2D problem={problem} progress={progress} />
+      </div>
 
-        {/* Overlay Controls for Movement (Shared for both 3D and 2D) */}
-        {hasMovementParams && (
-            <div className="absolute bottom-6 left-4 right-4 bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-2xl flex flex-col gap-2 z-10 max-w-2xl mx-auto">
-                <div className="flex items-center justify-between text-xs text-gray-500 font-mono">
-                    <span>T = {(progress * (problem.movementParams!.totalTime)).toFixed(1)}s</span>
-                    <span>Total: {problem.movementParams!.totalTime}s</span>
+      {/* Playback Controls */}
+      {hasControls && (
+        <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 px-8 shadow-[0_-4px_20px_rgba(0,0,0,0.02)] z-30">
+            <div className="max-w-3xl mx-auto flex flex-col gap-3">
+                {/* Progress Bar & Time */}
+                <div className="flex items-center gap-4">
+                    <span className="text-xs font-mono text-gray-500 w-12 text-right">
+                        {(progress * (problem.movementParams!.totalTime)).toFixed(1)}s
+                    </span>
+                    <input 
+                        type="range" 
+                        min="0" 
+                        max="1" 
+                        step="0.001"
+                        value={progress}
+                        onChange={handleSeek}
+                        className="flex-1 h-1.5 bg-gray-200 rounded-full appearance-none cursor-pointer accent-indigo-600 hover:accent-indigo-700"
+                    />
+                    <span className="text-xs font-mono text-gray-400 w-12">
+                        {problem.movementParams!.totalTime}s
+                    </span>
                 </div>
-                
-                <input 
-                    type="range" 
-                    min="0" 
-                    max="1" 
-                    step="0.001"
-                    value={progress}
-                    onChange={handleSeek}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                />
 
-                <div className="flex items-center justify-between mt-2">
-                    <div className="flex gap-2">
+                {/* Buttons */}
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
                         <button 
                             onClick={() => setIsPlaying(!isPlaying)}
-                            className="p-2 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                            className="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 transition-all shadow-md active:scale-95"
                         >
-                            {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-0.5" />}
+                            {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-1" />}
                         </button>
                         <button 
                             onClick={() => { setProgress(0); setIsPlaying(false); }}
-                            className="p-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
+                            className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all active:scale-95"
+                            title="重置"
                         >
-                            <RotateCcw size={20} />
+                            <RotateCcw size={18} />
                         </button>
                     </div>
 
-                    <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
-                        {[0.5, 1, 2].map((speed) => (
+                    <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+                        {[0.5, 1, 2, 5].map((speed) => (
                             <button
                                 key={speed}
                                 onClick={() => setSpeedMultiplier(speed)}
-                                className={`px-2 py-1 text-xs font-bold rounded ${speedMultiplier === speed ? 'bg-white shadow text-indigo-600' : 'text-gray-500'}`}
+                                className={`px-3 py-1 text-xs font-bold rounded transition-all ${speedMultiplier === speed ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
                             >
                                 {speed}x
                             </button>
@@ -162,16 +130,8 @@ export const Visualizer3D: React.FC<Props> = ({ problem }) => {
                     </div>
                 </div>
             </div>
-        )}
-        
-        {/* Legend for Geometry 3D only */}
-        {hasGeometryParams && viewMode === '3D' && (
-             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-lg text-sm text-gray-700 font-medium flex items-center gap-2 pointer-events-none select-none">
-                <Maximize size={16} />
-                <span>拖动鼠标旋转视角 · 滚轮缩放</span>
-             </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

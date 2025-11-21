@@ -2,221 +2,246 @@ import { ProblemData, SceneType } from '../types';
 
 export const PRESET_PROBLEMS: ProblemData[] = [
   {
-    id: '2024-gk-move',
+    id: '2024-gk-train-bridge',
     type: SceneType.MOVEMENT,
-    source: '2024年国考行政执法卷',
-    title: '甲乙相向而行（相遇问题）',
-    question: '甲、乙两人同时从A、B两地出发，相向而行。甲每分钟走80米，乙每分钟走60米。出发10分钟后，两人在距离中点100米处相遇。问A、B两地相距多少米？',
-    analysis: '本题考察直线相遇问题。关键点在于理解“距离中点100米”的含义。快者比慢者多走了 $2 \\times 100 = 200$ 米。',
+    source: '2024年国考模拟卷',
+    title: '火车过桥问题',
+    question: '一列火车长200米，以20米/秒的速度通过一座长1000米的大桥。问火车从车头刚上桥到车尾完全离开桥共需多少时间？',
+    analysis: '火车完全通过大桥，行驶的路程 = 桥长 + 车长。这是一个典型的追及模型变种，或者视为“车尾追桥头”。',
     solutionSteps: [
-      '设A、B两地相距 $S$ 米。',
-      '甲的速度 $v_1 = 80$ m/min，乙的速度 $v_2 = 60$ m/min。',
-      '根据题意，甲比乙快，所以甲走的距离比乙多 200米。',
-      '验证时间：$(80 - 60) \\times t = 200 \\Rightarrow 20t = 200 \\Rightarrow t = 10$ 分钟 (与题意吻合)。',
-      '总路程 $S = (v_1 + v_2) \\times t$',
-      '$S = (80 + 60) \\times 10 = 1400$ 米。'
+      '确定总路程 $S = L_{桥} + L_{车}$。',
+      '$S = 1000 + 200 = 1200$ 米。',
+      '速度 $v = 20$ 米/秒。',
+      '时间 $t = S / v = 1200 / 20 = 60$ 秒。'
     ],
-    answer: '1400米',
+    answer: '60秒',
     movementParams: {
-      objectAName: '甲',
-      objectBName: '乙',
-      speedA: 80,
-      speedB: 60,
-      initialDistance: 1400,
-      direction: 'OPPOSITE',
-      totalTime: 12,
-      meetingTime: 10
+      objectAName: '火车头',
+      objectBName: '大桥', // Static object
+      speedA: 20,
+      speedB: 0,
+      initialDistance: 1000, // Visual gap
+      direction: 'SAME', // Effectively moving through
+      totalTime: 70,
+      meetingTime: 60
     }
   },
   {
-    id: '2023-sk-chase',
+    id: '2023-sk-chase-police',
     type: SceneType.MOVEMENT,
-    source: '2023年广东省考县级卷',
-    title: '警车追击逃犯（追及问题）',
-    question: '某逃犯在高速公路上驾车以120千米/小时的速度逃窜，警车在逃犯后方30千米处，以150千米/小时的速度追击。问警车多少小时后能追上逃犯？',
-    analysis: '典型的追及问题。核心公式：追及路程 = 速度差 × 追及时间，即 $S = \\Delta v \\times t$。',
+    source: '2023年省考行测',
+    title: '警车追击问题',
+    question: '一辆警车以80km/h的速度追击前方20km处的逃犯车辆。逃犯车辆的速度为60km/h。问警车需要多少小时才能追上逃犯？',
+    analysis: '追及问题基本公式：$T = \\text{路程差} / \\text{速度差}$。',
     solutionSteps: [
-      '确定速度差：$\\Delta v = 150 - 120 = 30$ km/h。',
-      '确定追及路程（初始距离）：$S = 30$ km。',
-      '利用公式 $t = S / \\Delta v$',
-      '$t = 30 / 30 = 1$ 小时。'
+      '速度差 $\\Delta v = 80 - 60 = 20$ km/h。',
+      '路程差 $\\Delta S = 20$ km。',
+      '时间 $t = 20 / 20 = 1$ 小时。'
     ],
     answer: '1小时',
     movementParams: {
       objectAName: '警车',
       objectBName: '逃犯',
-      speedA: 150,
-      speedB: 120,
-      initialDistance: 30,
+      speedA: 80,
+      speedB: 60,
+      initialDistance: 20,
       direction: 'SAME',
-      totalTime: 1.5,
+      totalTime: 1.2,
       meetingTime: 1
     }
   },
   {
-    id: '2023-sd-river',
+    id: '2022-sydw-meet-basic',
     type: SceneType.MOVEMENT,
-    source: '2023年山东省考',
-    title: '流水行船问题',
-    question: '一只船从甲码头到乙码头往返一次共用4小时，回来时顺水比去时每小时多行驶12千米，因此第二小时比第一小时多行6千米。求甲、乙两码头的距离。',
-    analysis: '$v_{顺} = v_{船} + v_{水}$，$v_{逆} = v_{船} - v_{水}$。差值12即为 $2v_{水}$。',
+    source: '2022年事业单位',
+    title: '直线相遇问题',
+    question: '甲、乙两车从相距300公里的A、B两地同时出发，相向而行。甲的速度是40km/h，乙的速度是60km/h。经过几小时两车相遇？',
+    analysis: '相遇问题基本公式：$T = \\text{总路程} / \\text{速度和}$。',
     solutionSteps: [
-      '已知顺水比逆水每小时多行12千米，即 $v_{顺} - v_{逆} = 12$。',
-      '第二小时比第一小时多行6千米，说明前一小时逆水，后一小时顺水。',
-      '设路程为 $S$。时间比 $T_{逆}/T_{顺} = v_{顺}/v_{逆}$。',
-      '由题意推导可得 $S = 30$ 千米 (此处简化计算步骤用于演示)。',
-      '模拟演示：船只往返（演示去程逆水，回程顺水）。'
+      '速度和 $v_{和} = 40 + 60 = 100$ km/h。',
+      '总路程 $S = 300$ km。',
+      '时间 $t = 300 / 100 = 3$ 小时。'
     ],
-    answer: '30千米',
+    answer: '3小时',
     movementParams: {
-      objectAName: '逆水船',
-      objectBName: '水流',
-      speedA: 15, // 模拟相对速度
-      speedB: 0,  // 参考系
-      initialDistance: 30,
-      direction: 'SAME', // 这里的方向主要用于演示位移
-      totalTime: 4,
-      meetingTime: 2
-    }
-  },
-  {
-    id: '2022-sydw-geo',
-    type: SceneType.GEOMETRY,
-    source: '2022年事业单位联考A类',
-    title: '立方体切割（几何表面积）',
-    question: '将一个边长为4厘米的正方体表面涂红，然后切割成边长为1厘米的小正方体。问三面涂红的小正方体有多少个？',
-    analysis: '三面涂红的小正方体位于大正方体的8个顶点处。无论大正方体被分割成多少份，顶点始终只有8个。',
-    solutionSteps: [
-      '理解立方体结构：顶点块有3个面露在外面。',
-      '棱上的块（不含顶点）有2个面露在外面。',
-      '面中心的块有1个面露在外面。',
-      '内部的块没有面露在外面。',
-      '因此，三面涂红的即为8个顶点。'
-    ],
-    answer: '8个',
-    geometryParams: {
-      shape: 'CUBE',
-      dimensionA: 4,
-      label: '切割立方体',
-      description: '边长为4的大正方体，8个顶点（三面红）位置固定。'
-    }
-  },
-  {
-    id: '2022-zhejiang-train',
-    type: SceneType.MOVEMENT,
-    source: '2022年浙江省考',
-    title: '火车过桥问题',
-    question: '一列火车长300米，以72千米/小时的速度通过一座长1500米的大桥。问火车完全通过大桥需要多少秒？',
-    analysis: '火车过桥路程 = 桥长 + 车长。注意单位换算 $72km/h = 20m/s$。',
-    solutionSteps: [
-      '单位换算：$72 km/h = 72000m / 3600s = 20 m/s$。',
-      '完全通过路程 $S = L_{桥} + L_{车} = 1500 + 300 = 1800$ 米。',
-      '时间 $t = S / v = 1800 / 20 = 90$ 秒。'
-    ],
-    answer: '90秒',
-    movementParams: {
-      objectAName: '火车头',
-      objectBName: '桥尾',
-      speedA: 20,
-      speedB: 0, // 桥不动
-      initialDistance: 1800, // 模拟总路程
-      direction: 'SAME', // 追及模型（追上桥尾即通过）
-      totalTime: 100,
-      meetingTime: 90
-    }
-  },
-  {
-    id: '2021-gk-move-2',
-    type: SceneType.MOVEMENT,
-    source: '2021年国考副省级',
-    title: '甲乙折返跑（多次相遇）',
-    question: '甲、乙两车同时从A地出发前往B地。甲车速度为100km/h，乙车速度为80km/h。甲到达B地后立即返回，在距离B地20km处与乙车相遇。求A、B两地距离。',
-    analysis: '这是一个相遇与追及结合的变种。甲比乙多走了 $20+20=40$ km。注意：虽然是往返，但从相对运动看，甲比乙多行的路程是固定的。',
-    solutionSteps: [
-      '相遇时，甲到达B点又返回20km，乙还差20km到达B点。',
-      '甲比乙多走的路程 $= 20 + 20 = 40$ km。',
-      '速度差 $\\Delta v = 100 - 80 = 20$ km/h。',
-      '时间 $t = 40 / 20 = 2$ 小时。',
-      '总路程 $S = v_{乙} \\times t + 20 = 80 \\times 2 + 20 = 180$ km。'
-    ],
-    answer: '180公里',
-    movementParams: {
-      objectAName: '甲车(折返)',
+      objectAName: '甲车',
       objectBName: '乙车',
-      speedA: 100,
-      speedB: 80,
-      initialDistance: 40, 
+      speedA: 40,
+      speedB: 60,
+      initialDistance: 300,
+      direction: 'OPPOSITE',
+      totalTime: 3.5,
+      meetingTime: 3
+    }
+  },
+  {
+    id: '2023-river-boat',
+    type: SceneType.MOVEMENT,
+    source: '经典题库-流水行船',
+    title: '流水行船问题',
+    question: '某船在静水中的速度是20km/h，水流速度是4km/h。船从甲码头顺流而下到达乙码头用了2小时。求甲乙两码头的距离。',
+    analysis: '顺流速度 = 船速 + 水速。距离 = 顺流速度 × 时间。',
+    solutionSteps: [
+      '顺流速度 $v_{顺} = 20 + 4 = 24$ km/h。',
+      '时间 $t = 2$ 小时。',
+      '距离 $S = 24 \\times 2 = 48$ km。'
+    ],
+    answer: '48千米',
+    movementParams: {
+      objectAName: '顺水船',
+      objectBName: '岸边参考',
+      speedA: 24, // 20+4
+      speedB: 0,
+      initialDistance: 48,
       direction: 'SAME',
       totalTime: 2.5,
       meetingTime: 2
     }
   },
   {
-    id: '2020-sk-geo-cyl',
-    type: SceneType.GEOMETRY,
-    source: '2020年江苏省考A类',
-    title: '圆柱体体积变化',
-    question: '一个圆柱体，如果底面半径增加20%，高减少20%，那么它的体积将如何变化？',
-    analysis: '利用圆柱体积公式 $V = \\pi r^2h$ 进行比例计算。',
-    solutionSteps: [
-      '设原半径为$r$，原高为$h$，原体积 $V_1 = \\pi r^2h$。',
-      '新半径 $r\' = 1.2r$，新高 $h\' = 0.8h$。',
-      '新体积 $V_2 = \\pi(1.2r)^2(0.8h) = \\pi(1.44r^2)(0.8h)$。',
-      '$V_2 = 1.44 \\times 0.8 \\times \\pi r^2h = 1.152 V_1$。',
-      '变化率 $= (1.152 - 1) = 15.2\\%$。'
-    ],
-    answer: '增加15.2%',
-    geometryParams: {
-      shape: 'CYLINDER',
-      dimensionA: 12, // visual scale
-      dimensionB: 8,
-      label: '变化后的圆柱',
-      description: '半径变大(x1.2)，高度变矮(x0.8)，总体积变大。'
-    }
-  },
-  {
-    id: '2021-sichuan-cube',
-    type: SceneType.GEOMETRY,
-    source: '2021年四川省考',
-    title: '最大球体体积（内切球）',
-    question: '在一个棱长为6的正方体内部，挖去一个最大的球体，求该球体的体积。',
-    analysis: '正方体内切球的直径等于正方体的棱长。',
-    solutionSteps: [
-      '正方体棱长 $a = 6$。',
-      '内切球直径 $d = a = 6$，故半径 $r = 3$。',
-      '球体体积公式 $V = \\frac{4}{3}\\pi r^3$。',
-      '$V = \\frac{4}{3}\\pi \\times 3^3 = \\frac{4}{3}\\pi \\times 27 = 36\\pi$。'
-    ],
-    answer: '$36\\pi$',
-    geometryParams: {
-      shape: 'SPHERE',
-      dimensionA: 3,
-      label: '内切球',
-      description: '球体半径为3，刚好内切于棱长为6的立方体中。'
-    }
-  },
-  {
-    id: '2025-mock-drone',
+    id: '2025-complex-meet',
     type: SceneType.MOVEMENT,
-    source: '2025年公考模拟卷',
-    title: '无人机往返飞行',
-    question: '甲、乙两车相距100千米，同时出发相向而行，速度分别为40km/h和60km/h。一架无人机以120km/h的速度与甲车同时出发，飞向乙车，遇到乙车后立即返回飞向甲车，如此往返，直到两车相遇。问无人机共飞行了多少千米？',
-    analysis: '不要关注无人机复杂的往返过程，关注时间。无人机飞行的时间等于两车相遇的时间。',
+    source: '2025年国考预测',
+    title: '二次相遇问题',
+    question: '甲、乙两人同时从两地出发，相向而行。第一次相遇时距离A地60米。相遇后继续前进，到达对方起点后立即返回。第二次相遇时距离B地40米。求A、B两地的距离。',
+    analysis: '单岸型二次相遇。第一次相遇共走1个全长S，第二次相遇共走3个全长3S。甲走的路程也应是倍数关系。',
     solutionSteps: [
-      '计算两车相遇时间：$t = S / (v_1 + v_2) = 100 / (40 + 60) = 1$ 小时。',
-      '在这一小时内，无人机一直在飞。',
-      '无人机总路程 $S_{无人机} = v_{无人机} \\times t = 120 \\times 1 = 120$ km。'
+      '设全程为S。',
+      '第一次相遇，甲走了60米，两人共走S。',
+      '第二次相遇，两人共走了3S，所以甲共走了 $3 \\times 60 = 180$ 米。',
+      '此时甲的位置：到达B点折返40米，即 $S + 40 = 180$。',
+      '$S = 140$ 米。'
     ],
-    answer: '120千米',
+    answer: '140米',
     movementParams: {
-      objectAName: '无人机',
-      objectBName: '终点(相遇点)',
-      speedA: 120,
-      speedB: 0, 
-      initialDistance: 120,
-      direction: 'SAME',
-      totalTime: 1.2,
+      objectAName: '甲',
+      objectBName: '乙',
+      speedA: 60, // 相对概念，第一次相遇走了60
+      speedB: 80, // 假设S=140，乙走了80
+      initialDistance: 140,
+      direction: 'OPPOSITE',
+      totalTime: 3, // 模拟多次
       meetingTime: 1
+    }
+  },
+  {
+    id: '2021-escalator',
+    type: SceneType.MOVEMENT,
+    source: '2021年省考',
+    title: '扶梯运动问题',
+    question: '商场自动扶梯向上运行，小明逆着扶梯向下走。小明每秒走3级台阶，扶梯每秒向上运行1级台阶。若扶梯可见部分共40级，小明走到底需要多少秒？',
+    analysis: '逆行问题。人相对于地面的速度 = 人速 - 梯速。',
+    solutionSteps: [
+      '人相对于地面的位移速度 $v = 3 - 1 = 2$ 级/秒。',
+      '路程（扶梯级数）$S = 40$ 级。',
+      '时间 $t = 40 / 2 = 20$ 秒。'
+    ],
+    answer: '20秒',
+    movementParams: {
+      objectAName: '小明(逆)',
+      objectBName: '扶梯终点',
+      speedA: 2, // Net speed
+      speedB: 0,
+      initialDistance: 40, // stairs
+      direction: 'SAME', // Walking down to bottom
+      totalTime: 22,
+      meetingTime: 20
+    }
+  },
+  {
+    id: '2020-team-march',
+    type: SceneType.MOVEMENT,
+    source: '2020年军队文职',
+    title: '队伍行进问题',
+    question: '一支长100米的队伍以2m/s的速度匀速前进。通讯员以6m/s的速度从队尾跑到队头传递文件。问通讯员追上队头需要多少时间？',
+    analysis: '追及问题。通讯员追队头，路程差即为队伍长度。',
+    solutionSteps: [
+      '路程差 $S = 100$ 米。',
+      '速度差 $\\Delta v = 6 - 2 = 4$ m/s。',
+      '时间 $t = 100 / 4 = 25$ 秒。'
+    ],
+    answer: '25秒',
+    movementParams: {
+      objectAName: '通讯员',
+      objectBName: '队头',
+      speedA: 6,
+      speedB: 2,
+      initialDistance: 100, // 队尾到队头的距离
+      direction: 'SAME',
+      totalTime: 30,
+      meetingTime: 25
+    }
+  },
+  {
+    id: '2024-clock-hands',
+    type: SceneType.MOVEMENT,
+    source: '趣味数学题库',
+    title: '时钟追及问题',
+    question: '现在是3点整。问多少分钟后，分针第一次追上时针？',
+    analysis: '时钟问题本质是环形追及。分针速度6度/分，时针0.5度/分。3点时相距90度。',
+    solutionSteps: [
+      '速度差 $\\Delta v = 6 - 0.5 = 5.5$ 度/分。',
+      '初始路程差（角度）$S = 90$ 度。',
+      '时间 $t = 90 / 5.5 = 180/11 \\approx 16.36$ 分。'
+    ],
+    answer: '16.36分',
+    movementParams: {
+      objectAName: '分针',
+      objectBName: '时针',
+      speedA: 6,
+      speedB: 0.5,
+      initialDistance: 90, // Degrees, represented linearly
+      direction: 'SAME',
+      totalTime: 20,
+      meetingTime: 16.36
+    }
+  },
+  {
+    id: '2022-tunnel-double',
+    type: SceneType.MOVEMENT,
+    source: '2022年北京公考',
+    title: '双向隧道错车',
+    question: '甲、乙两列火车分别长150米和200米，相向行驶在双轨隧道中。甲车速度20m/s，乙车速度15m/s。两车从车头相遇到车尾离开共需多少秒？',
+    analysis: '错车问题（相向）。错车路程 = 两车车长之和。',
+    solutionSteps: [
+      '总路程 $S = 150 + 200 = 350$ 米。',
+      '速度和 $v = 20 + 15 = 35$ m/s。',
+      '时间 $t = 350 / 35 = 10$ 秒。'
+    ],
+    answer: '10秒',
+    movementParams: {
+      objectAName: '甲火车',
+      objectBName: '乙火车',
+      speedA: 20,
+      speedB: 15,
+      initialDistance: 350, // Represents lengths sum logic visually
+      direction: 'OPPOSITE',
+      totalTime: 12,
+      meetingTime: 10
+    }
+  },
+  {
+    id: '2021-dog-run',
+    type: SceneType.MOVEMENT,
+    source: '2021年江苏省考',
+    title: '小狗折返跑',
+    question: '甲乙两地相距200米，小红小明同时相向而行，速度分别为2m/s和3m/s。一只狗以6m/s的速度从小红处跑向小明，遇到小明后立即返回跑向小红。直到两人相遇。问狗跑了多少米？',
+    analysis: '不需要算折返次数。狗跑的时间 = 人相遇的时间。',
+    solutionSteps: [
+      '人相遇时间 $t = 200 / (2 + 3) = 40$ 秒。',
+      '狗一直在跑，且时间也是40秒。',
+      '狗跑的路程 $S = 6 \\times 40 = 240$ 米。'
+    ],
+    answer: '240米',
+    movementParams: {
+      objectAName: '狗',
+      objectBName: '相遇点', // Virtual target
+      speedA: 6,
+      speedB: 0, 
+      initialDistance: 240,
+      direction: 'SAME',
+      totalTime: 45,
+      meetingTime: 40
     }
   }
 ];
